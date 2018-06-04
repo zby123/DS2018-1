@@ -12,7 +12,7 @@
 #define OFFSET_TYPE unsigned long long
 //file io
 const OFFSET_TYPE MAX_FILENAME_LEN = 30;
-const OFFSET_TYPE MAX_BLOCK_SIZE = 252;
+const OFFSET_TYPE MAX_BLOCK_SIZE = 4;
 const OFFSET_TYPE INVALID_OFFSET = -1;
 //node type
 const int INTERN_NODE = 1;
@@ -793,7 +793,6 @@ private:
        const BPTNode *tmpn = nullptr;
        //T *dtaptr = nullptr;
        OFFSET_TYPE pos = 0;
-       bool sonflag = 0;
        if(st->nodeType == LEAF_NODE){
            pos = binSearchForRange(st, kl);
            while(1){
@@ -815,9 +814,8 @@ private:
        else{
            pos = binSearch(st, kl);
            tmpn = readNode(st->data[pos].data);
-           if(tmpn->nodeType == LEAF_NODE) sonflag = 1;
            treeFindRange(kl, kr, tmpn, vec);
-           if(!sonflag) delete tmpn;
+           if(!tmpn) delete tmpn;
            tmpn = nullptr;
            return;
        }
@@ -831,7 +829,6 @@ private:
        const BPTNode *tmpn = nullptr;
        T *dtaptr = nullptr;
        OFFSET_TYPE pos = 0;
-       bool sonflag = 0;
        if(st->nodeType == LEAF_NODE){
            pos = binSearchForRange(st, kl);
            if(pos == -1){
@@ -863,9 +860,8 @@ private:
        else{
            pos = binSearch(st, kl);
            tmpn = readNode(st->data[pos].data);
-           if(tmpn->nodeType == LEAF_NODE) sonflag = 1;
            treeFindRangeForData(kl, kr, tmpn, vec);
-           if(!sonflag) delete tmpn;
+           if(!tmpn) delete tmpn;
            tmpn = nullptr;
            return;
        }
