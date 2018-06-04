@@ -17,6 +17,7 @@ int main(){
     char op[50];
     char *res = nullptr;
     while (1) {
+        res = nullptr;
         scanf("%s", op);
         if (eqv(op, "register")) printf("%d\n", tmp.regist());
         else if (eqv(op, "login")) printf("%d\n", tmp.login());
