@@ -9,7 +9,7 @@
 #include "dbException.hpp"
 #define IOB std::ios_base::in | std::ios_base::out | std::ios_base::binary
 #define TIOB std::ios_base::trunc | std::ios_base::in | std::ios_base::out | std::ios_base::binary
-#define OFFSET_TYPE unsigned long long
+#define OFFSET_TYPE unsigned int
 #define MAX_BLOCK_SIZE (((4096 - sizeof(int) - 4 * sizeof(OFFSET_TYPE)) / (sizeof(treeData)) / 2) * 2)
 //file io
 const OFFSET_TYPE MAX_FILENAME_LEN = 30;
