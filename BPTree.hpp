@@ -184,7 +184,7 @@ private:
         fidx.flush();
         //I will read mgr file into Q here
         OFFSET_TYPE fsize = 0;
-        fmgr.open(idxFileMgr, IOB);
+       /* fmgr.open(idxFileMgr, IOB);
         fmgr.seekg(0, std::ios_base::end);
         fsize = fmgr.tellg();
         fmgr.seekg(0);
@@ -205,7 +205,7 @@ private:
                 QdbMgr.push(offset);
             }
         }
-        fmgr.close();
+        fmgr.close();*/
         return 1;
     }
 
@@ -938,7 +938,7 @@ public:
         OFFSET_TYPE offset = 0;
 
         //Dump Q into files
-        if(fmgr.is_open() || fmgr.fail()) fmgr.close();
+       /* if(fmgr.is_open() || fmgr.fail()) fmgr.close();
         fmgr.open(idxFileMgr, TIOB);
         while(!QidxMgr.empty()){
             offset = QidxMgr.front();
@@ -952,7 +952,7 @@ public:
             fmgr.write((char*)&offset, sizeof( OFFSET_TYPE ));
             QdbMgr.pop();
         }
-        fmgr.close();
+        fmgr.close();*/
         writeIdx();
         fidx.close();
         fdb.close();
