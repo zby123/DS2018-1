@@ -13,7 +13,6 @@
 //file io
 const OFFSET_TYPE MAX_FILENAME_LEN = 30;
 const OFFSET_TYPE MAX_BLOCK_SIZE = 252;
-const OFFSET_TYPE FIRST_NODE_OFFSET = MAX_FILENAME_LEN * sizeof(char) * 2 + 2 * sizeof( OFFSET_TYPE );
 const OFFSET_TYPE INVALID_OFFSET = -1;
 //node type
 const int INTERN_NODE = 1;
@@ -161,29 +160,28 @@ private:
     }
 
     bool writeIdx(){
-        if(fidx.is_open()) fidx.close();
-        fidx.open(idxFileName, IOB);
+        if(!fidx.is_open()) fidx.open(idxFileName, IOB);
+        fidx.seekp(0);
         fidx.write(idxFileName, sizeof(char) * MAX_FILENAME_LEN);
         fidx.write(dbFileName, sizeof(char) * MAX_FILENAME_LEN);
         fidx.write((const char*)&dataSize, sizeof( OFFSET_TYPE ));
         fidx.write((const char*)&rootOffset, sizeof( OFFSET_TYPE ));
-        fidx.close();
+        fidx.flush();
         return 1;
     }
 
     bool readIdx(){
-        if(fidx.is_open()) fidx.close();
-        fidx.open(idxFileName, IOB);
+        if(!fidx.is_open()) fidx.open(idxFileName, IOB);
         char tmp[MAX_FILENAME_LEN];
         OFFSET_TYPE offset = 0;
+        fidx.seekg(0);
         fidx.read(tmp, sizeof(char) * MAX_FILENAME_LEN);
         if(strcmp(idxFileName, tmp) != 0) throw fileNotMatch();
         strcpy(idxFileName, tmp);
         fidx.read(dbFileName, sizeof(char) * MAX_FILENAME_LEN);
         fidx.read((char*)&dataSize, sizeof( OFFSET_TYPE ));
         fidx.read((char*)&rootOffset, sizeof( OFFSET_TYPE ));
-        fidx.close();
-
+        fidx.flush();
         //I will read mgr file into Q here
         OFFSET_TYPE fsize = 0;
         fmgr.open(idxFileMgr, IOB);
@@ -213,8 +211,7 @@ private:
 
     //dont forget to delete after use readNode()!
     BPTNode *readNode(OFFSET_TYPE offset){
-        if(fidx.is_open() || fidx.fail()) fidx.close();
-        fidx.open(idxFileName, IOB);
+        if(!fidx.is_open()) fidx.open(idxFileName, IOB);
         if(!fidx.is_open() || fidx.fail() ) return nullptr;
         BPTNode *tmp = new BPTNode;
         fidx.seekg(offset);
@@ -224,12 +221,12 @@ private:
         fidx.read((char*)&(tmp->sz), sizeof( OFFSET_TYPE ));
         fidx.read((char*)&(tmp->nodeOffset), sizeof( OFFSET_TYPE ));
         fidx.read((char*)(tmp->data), sizeof(treeData) * MAX_BLOCK_SIZE);
-        fidx.close();
+        fidx.flush();
         return tmp;
     }
     bool writeNode(BPTNode *p, OFFSET_TYPE offset = 0){
-        if(fidx.is_open() || fidx.fail()) fidx.close();
-        fidx.open(idxFileName, IOB);
+        if(fidx.fail()) fidx.close();
+        if(!fidx.is_open()) fidx.open(idxFileName, IOB);
         if(offset == 0){
             fidx.seekg(0, std::ios_base::end);
             offset = fidx.tellg();
@@ -246,7 +243,7 @@ private:
         fidx.write((const char*)&(p->sz), sizeof( OFFSET_TYPE ));
         fidx.write((const char*)&(p->nodeOffset), sizeof( OFFSET_TYPE ));
         fidx.write((const char*)(p->data), sizeof(treeData) * MAX_BLOCK_SIZE);
-        fidx.close();
+        fidx.flush();
         return 1;
     }
 
@@ -271,9 +268,9 @@ private:
    }
 
    OFFSET_TYPE writeData(const T *dataPtr){
-       if(fdb.is_open() || fdb.fail()) fdb.close();
+       if(fdb.fail()) fdb.close();
+       if(!fdb.is_open()) fdb.open(dbFileName, IOB);
        OFFSET_TYPE offset = 0;
-       fdb.open(dbFileName, IOB);
        if(!fdb) return 0;
        if(!QdbMgr.empty()){
             offset = QdbMgr.front();
@@ -285,17 +282,17 @@ private:
        }
        fdb.seekp(offset);
        fdb.write((const char*)dataPtr, sizeof(T));
-       fdb.close();
+       fdb.flush();
        return offset;
    }
 
    OFFSET_TYPE modData(const T *dataPtr, const OFFSET_TYPE &offset){
-       if(fdb.is_open() || fdb.fail()) fdb.close();
-       fdb.open(dbFileName, IOB);
+       if(fdb.fail()) fdb.close();
+       if(!fdb.is_open()) fdb.open(dbFileName, IOB);
        if(fdb.fail()) return INVALID_OFFSET;
        fdb.seekp(offset);
        fdb.write((const char*)dataPtr, sizeof(T));
-       fdb.close();
+       fdb.flush();
        return offset;
    }
 
@@ -517,8 +514,10 @@ private:
            BPTNode *btmp = readNode(st->data[pos].data);
            retVal dtmp = treeInsert(k, dta, btmp);
            if(dtmp.status == NOTHING){
-               st->data[pos].k = dtmp.retDta.k;
-               writeNode(st, st->nodeOffset);
+               if(keyCompare(st->data[pos].k, dtmp.retDta.k) != 2){
+                    st->data[pos].k = dtmp.retDta.k;
+                    writeNode(st, st->nodeOffset);
+               }
                retVal itmp = retVal(st->data[0], NOTHING);
                delete st;
                st = nullptr;
@@ -787,10 +786,8 @@ private:
 
    }
 
-   void treeFindRange(const Key &kl, const Key &kr, const BPTNode *st, sjtu::vector<Key> &vec){
+   void treeFindRange(const Key &kl, const Key &kr, const BPTNode *&st, sjtu::vector<Key> &vec){
        if(keyCompare(kl, kr) == 0){
-           delete st;
-           st = nullptr;
            return;
        }
        const BPTNode *tmpn = nullptr;
@@ -827,10 +824,8 @@ private:
    }
 
 
-   void treeFindRangeForData(const Key &kl, const Key &kr, const BPTNode *st, sjtu::vector<T> &vec){
+   void treeFindRangeForData(const Key &kl, const Key &kr, const BPTNode *&st, sjtu::vector<T> &vec){
        if(keyCompare(kl, kr) == 0){
-            delete st;
-            st = nullptr;
             return;
        }
        const BPTNode *tmpn = nullptr;
@@ -941,8 +936,6 @@ public:
         importIdxFile(sizeof(T));
     }
 
-    BPTree() = default;
-
     ~BPTree(){
         if(currentNode) delete currentNode;
         currentNode = nullptr;
@@ -965,6 +958,8 @@ public:
         }
         fmgr.close();
         writeIdx();
+        fidx.close();
+        fdb.close();
     }
     //Insert, Remove, Find
     bool insertData(const Key &k, const T &dta){
@@ -1031,7 +1026,7 @@ public:
         changeToRoot();
         const BPTNode *fst = currentNode;
         treeFindRange(kl, kr, fst, vec);
-        currentNode = nullptr;
+        if(fst == nullptr) currentNode = nullptr;
     }
 
     void findRD(const Key &kl, const Key &kr, sjtu::vector<T> &vec){
@@ -1039,7 +1034,7 @@ public:
         changeToRoot();
         const BPTNode *fst = currentNode;
         treeFindRangeForData(kl, kr, fst, vec);
-        currentNode = nullptr;
+        if(fst == nullptr) currentNode = nullptr;
     }
 
     void dfs(){
