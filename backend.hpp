@@ -39,6 +39,9 @@ public:
 			tmp.ticketID = 0;
 			ticketDB.insert(foo, tmp);
 		}
+                else{
+                    delete bar.first;
+                }
 	}
 
 	void clear() {
