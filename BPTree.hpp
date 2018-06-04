@@ -155,7 +155,7 @@ private:
     }
 
     inline bool deleteNode(BPTNode *p, OFFSET_TYPE offset){
-        QidxMgr.push(offset);
+        //QidxMgr.push(offset);
         return 1;
     }
 
@@ -815,7 +815,7 @@ private:
            pos = binSearch(st, kl);
            tmpn = readNode(st->data[pos].data);
            treeFindRange(kl, kr, tmpn, vec);
-           if(!tmpn) delete tmpn;
+           if(tmpn) delete tmpn;
            tmpn = nullptr;
            return;
        }
@@ -861,7 +861,7 @@ private:
            pos = binSearch(st, kl);
            tmpn = readNode(st->data[pos].data);
            treeFindRangeForData(kl, kr, tmpn, vec);
-           if(!tmpn) delete tmpn;
+           if(tmpn) delete tmpn;
            tmpn = nullptr;
            return;
        }
