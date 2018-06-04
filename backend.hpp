@@ -424,6 +424,7 @@ public:
 						if (res2.first->a[j][k] < rest_tic) rest_tic = res2.first->a[j][k];
 					}
 				}
+                                delete res2.first;
 				tmp += to_string(rest_tic); tmp += ' ';
 				double tp = 0;
                 for(int k = tl + 1; k <= tr; k++) {
