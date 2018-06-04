@@ -39,7 +39,7 @@ int main(){
             printf("%s", res);
         }
         else if (eqv(op, "query_ticket")){
-            res = tmp.query_train();
+            res = tmp.query_ticket();
             printf("%s", res);
         }
         else if (eqv(op, "buy_ticket")) printf("%d\n", tmp.buy_ticket());
