@@ -259,11 +259,10 @@ private:
 
    T *readData(OFFSET_TYPE offset){
         T *tmp = new T();
-        if(fdb.fail() || fdb.is_open()) fdb.close();
-        fdb.open(dbFileName, IOB);
+        if(fdb.fail()) fdb.close();
+        if(!fdb.is_open()) fdb.open(dbFileName, IOB);
         fdb.seekg(offset);
         fdb.read((char*)tmp, sizeof(T));
-        fdb.close();
         return tmp;
    }
 
