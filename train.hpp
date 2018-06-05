@@ -8,7 +8,7 @@ struct station {
 	tstring<40> name;
 	tstring<5> t_arrive, t_start, t_stop;
 	mytime ta, ts;
-	double price[5];
+        double price[5];
 };
 
 struct Train {
@@ -16,9 +16,9 @@ struct Train {
 	char catalog;
 	tstring<40> name;
 	tstring<20> priceName[5];
-	int stationNum, priceNum;
+        char stationNum, priceNum;
 	bool sale;
-	station sta[60];
+        station sta[47];
 };
 
 #endif

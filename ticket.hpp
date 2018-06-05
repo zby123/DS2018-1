@@ -4,17 +4,17 @@
 
 struct Ticket {
 	tstring<20> trainID;
-	int ticketNum;
+        short ticketNum;
 	tstring<10> date;
-	int start, end, kind;
-	int ticketID;
+        char start, end, kind;
+        short ticketID;
 };
 
 struct tic {
-	int a[5][60];
+        short a[5][47];
 	tic() {
 		for(int i = 0; i < 5; i++) 
-			for(int j = 0; j < 60; j++) 
+                        for(int j = 0; j < 47; j++)
 				a[i][j] = 2000;
 	}
 };

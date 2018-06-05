@@ -6,7 +6,8 @@ class User {
 public:
 	tstring<20> password, email, phone;
 	tstring<40> name;
-	int privilege, id;
+        char privilege;
+        int id;
 };
 
 #endif

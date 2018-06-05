@@ -2,7 +2,7 @@
 #define TIME_HPP
 
 struct mytime {
-	int date, hr, mn;
+        char date, hr, mn;
 
 	mytime operator+ (const mytime &rhs) {
 		mytime ret;

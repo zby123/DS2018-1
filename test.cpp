@@ -65,6 +65,7 @@ int main(){
             delete [] res;
             res = nullptr;
         }
+        fflush(stdout);
     }
     return 0;
 }
