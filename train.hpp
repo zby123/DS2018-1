@@ -17,7 +17,7 @@ struct Train {
 	tstring<40> name;
 	tstring<20> priceName[5];
         char stationNum, priceNum;
-	bool sale;
+        char sale;
         station sta[46];
 };
 

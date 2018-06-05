@@ -134,23 +134,9 @@ private:
 
     //Dont forget to DELETE afte using allocNewNode()!
     BPTNode *allocNode(const int &nodeType){
-        if(fmgr.is_open()) fmgr.close();
+        if(fmgr.fail()) fmgr.close();
         BPTNode *tmp = new BPTNode(nodeType);
-        OFFSET_TYPE offset = 0;
-        fmgr.open(idxFileMgr, IOB);
-        if(!QidxMgr.empty()){
-            offset = QidxMgr.front();
-            QidxMgr.pop();
-            tmp->nodeOffset = offset;
-            writeNode(tmp, tmp->nodeOffset);
-            return tmp;
-        }
-        else{
-            writeNode(tmp);
-            return tmp;
-        }
-        delete tmp;
-        tmp = nullptr;
+        writeNode(tmp);
         return tmp;
     }
 
