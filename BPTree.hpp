@@ -10,9 +10,9 @@
 #define IOB std::ios_base::in | std::ios_base::out | std::ios_base::binary
 #define TIOB std::ios_base::trunc | std::ios_base::in | std::ios_base::out | std::ios_base::binary
 #define OFFSET_TYPE unsigned long
-#define MAX_BLOCK_SIZE ((((2048 - sizeof(int) - 4 * sizeof(OFFSET_TYPE)) / (sizeof(treeData))) >> 1) << 1)
+#define MAX_BLOCK_SIZE ((((2048 - sizeof(char) - 3 * sizeof(OFFSET_TYPE) - sizeof(short)) / (sizeof(treeData))) >> 1) << 1)
 //file io
-const OFFSET_TYPE MAX_FILENAME_LEN = 30;
+const OFFSET_TYPE MAX_FILENAME_LEN = 25;
 const OFFSET_TYPE INVALID_OFFSET = -1;
 //node type
 const int INTERN_NODE = 1;
@@ -70,8 +70,8 @@ private:
         BPTNode() = default;
         BPTNode(const int &ndt):nodeType(ndt){}
         //DATA
-        int nodeType = DELETED;
-        OFFSET_TYPE sz = 0;
+        char nodeType = DELETED;
+        short sz = 0;
         OFFSET_TYPE nodeOffset = INVALID_OFFSET;
         OFFSET_TYPE nextNode = INVALID_OFFSET;
         OFFSET_TYPE prevNode = INVALID_OFFSET;
@@ -201,10 +201,10 @@ private:
         if(!fidx.is_open() || fidx.fail() ) return nullptr;
         BPTNode *tmp = new BPTNode;
         fidx.seekg(offset);
-        fidx.read((char*)&(tmp->nodeType), sizeof(int));
+        fidx.read((char*)&(tmp->nodeType), sizeof(char));
         fidx.read((char*)&(tmp->nextNode), sizeof( OFFSET_TYPE ));
         fidx.read((char*)&(tmp->prevNode), sizeof( OFFSET_TYPE ));
-        fidx.read((char*)&(tmp->sz), sizeof( OFFSET_TYPE ));
+        fidx.read((char*)&(tmp->sz), sizeof( short ));
         fidx.read((char*)&(tmp->nodeOffset), sizeof( OFFSET_TYPE ));
         fidx.read((char*)(tmp->data), sizeof(treeData) * MAX_BLOCK_SIZE);
         return tmp;
@@ -222,10 +222,10 @@ private:
             return 0;
         }
         fidx.seekp(offset);
-        fidx.write((const char*)&(p->nodeType), sizeof(int));
+        fidx.write((const char*)&(p->nodeType), sizeof(char));
         fidx.write((const char*)&(p->nextNode), sizeof( OFFSET_TYPE ));
         fidx.write((const char*)&(p->prevNode), sizeof( OFFSET_TYPE ));
-        fidx.write((const char*)&(p->sz), sizeof( OFFSET_TYPE ));
+        fidx.write((const char*)&(p->sz), sizeof(short));
         fidx.write((const char*)&(p->nodeOffset), sizeof( OFFSET_TYPE ));
         fidx.write((const char*)(p->data), sizeof(treeData) * MAX_BLOCK_SIZE);
         fidx.flush();
