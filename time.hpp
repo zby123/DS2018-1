@@ -75,7 +75,8 @@ struct mytime {
 };
 
 struct mydate {
-	int yr, mn, dy;
+        short yr;
+        char mn, dy;
 
 	mydate() {
 		yr = mn = dy = 0;

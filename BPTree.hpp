@@ -221,7 +221,6 @@ private:
         fidx.read((char*)&(tmp->sz), sizeof( OFFSET_TYPE ));
         fidx.read((char*)&(tmp->nodeOffset), sizeof( OFFSET_TYPE ));
         fidx.read((char*)(tmp->data), sizeof(treeData) * MAX_BLOCK_SIZE);
-        fidx.flush();
         return tmp;
     }
     bool writeNode(BPTNode *p, OFFSET_TYPE offset = 0){
@@ -295,7 +294,7 @@ private:
        return offset;
    }
 
-   bool deleteData(OFFSET_TYPE offset){
+   inline bool deleteData(OFFSET_TYPE offset){
        //DBG
        /*OFFSET_TYPE p = -1;
        fdb.close();
@@ -303,7 +302,7 @@ private:
        fdb.seekp(offset);
        fdb.write((char*)&p, sizeof( OFFSET_TYPE ));
        fdb.close();*/
-       QdbMgr.push(offset);
+       //QdbMgr.push(offset);
        return 1;
    }
 

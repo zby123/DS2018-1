@@ -11,10 +11,10 @@ struct Ticket {
 };
 
 struct tic {
-        short a[5][47];
+        short a[5][46];
 	tic() {
 		for(int i = 0; i < 5; i++) 
-                        for(int j = 0; j < 47; j++)
+                        for(int j = 0; j < 46; j++)
 				a[i][j] = 2000;
 	}
 };
