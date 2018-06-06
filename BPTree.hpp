@@ -945,6 +945,7 @@ public:
         writeIdx();
         fidx.close();
         fdb.close();
+        fmgr.close();
     }
     //Insert, Remove, Find
     bool insertData(const Key &k, const T &dta){

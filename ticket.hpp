@@ -3,7 +3,7 @@
 #include "string.hpp"
 
 struct Ticket {
-	tstring<20> trainID;
+        tstring<12> trainID;
         short ticketNum;
 	tstring<10> date;
         char start, end, kind;

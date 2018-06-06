@@ -5,17 +5,17 @@
 #include "time.hpp"
 
 struct station {
-	tstring<40> name;
+        tstring<15> name;
 	tstring<5> t_arrive, t_start, t_stop;
 	mytime ta, ts;
         float price[5];
 };
 
 struct Train {
-	tstring<20> id;
+        tstring<12> id;
 	char catalog;
-	tstring<40> name;
-	tstring<20> priceName[5];
+        tstring<24> name;
+        tstring<12> priceName[5];
         char stationNum, priceNum;
         char sale;
         station sta[46];
