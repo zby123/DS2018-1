@@ -15,7 +15,9 @@ class fvector
 private:
 
         tstring<20> fileName;
+        int sz = 0;
 	fstream f;
+        fstream fsize;
 
 public:
         ~fvector(){
@@ -28,39 +30,31 @@ public:
                 f.open(fileName, ios_base::in);
 		if (!f) {
                         f.close();
-                        f.open(fileName, ios_base::out | ios_base::trunc | ios_base::binary);
-			int tot = 0;
-			f.write(reinterpret_cast<char*>(&tot), sizeof(int));
+                        f.open(fileName, ios_base::out | ios_base::binary);
+                        f.close();
+                        f.open(fileName, ios_base::in | ios_base::out | ios_base::binary);
+                        sz = 0;
 		}
                 else{
                     f.close();
                     f.open(fileName, ios_base::in | ios_base::out | ios_base::binary);
+                    f.seekg(0, ios::end);
+                    sz = (f.tellg()) / (sizeof(T));
                 }
 	}
 
-	int size()
+        inline int size()
 	{
-                if(f.fail()) f.close();
-                if(!f.is_open()) f.open(fileName, ios_base::in | ios_base::out | ios_base::binary);
-                f.seekg(0);
-                int tot = 0;
-                f.read(reinterpret_cast<char*>(&tot), sizeof(int));
-                f.flush();
-		return tot;
+                return sz;
 	}
 
         void insert(const K &key, const T &x)
 	{
             if(f.fail()) f.close();
             if(!f.is_open()) f.open(fileName, ios_base::in | ios_base::out | ios_base::binary);
-		int tot;
-		f.seekg(0, ios::beg);
-		f.read(reinterpret_cast<char*>(&tot), sizeof(int));
-		f.seekp(sizeof(int) + sizeof(T) * tot, ios::beg);
+                f.seekp(sizeof(T) * sz, ios::beg);
                 f.write(reinterpret_cast<const char*>(&x), sizeof(T));
-		f.seekp(0, ios::beg);
-		++tot;
-		f.write(reinterpret_cast<char*>(&tot), sizeof(int));
+                ++sz;
                 f.flush();
 	}
 
@@ -69,11 +63,8 @@ public:
             if(f.fail()) f.close();
             if(!f.is_open()) f.open(fileName, ios_base::in | ios_base::out | ios_base::binary);
                 T *tmp = new T;
-                f.seekg(0);
-                int sz = 0;
-                f.read((char*)&sz, sizeof(int));
                 if(pos >= sz) return MYPAIR<T*, bool>(nullptr, 0);
-		f.seekg(sizeof(int) + sizeof(T) * pos, ios::beg);
+                f.seekg(sizeof(T) * pos, ios::beg);
                 f.read(reinterpret_cast<char*>(tmp), sizeof(T));
                 f.flush();
                 return MYPAIR<T*, bool>(tmp, 1);
@@ -81,11 +72,9 @@ public:
 
 	void modify(int pos, const T &x)
 	{
-            if(f.fail()) f.close();
-            if(!f.is_open()) f.open(fileName, ios_base::in | ios_base::out | ios_base::binary);
                 if(f.fail()) f.close();
                 if(!f.is_open()) f.open(fileName, ios_base::out | ios_base::binary | ios_base::in);
-		f.seekp(sizeof(int) + sizeof(T) * pos, ios::beg);
+                f.seekp(sizeof(T) * pos, ios::beg);
                 f.write(reinterpret_cast<const char*>(&x), sizeof(T));
                 f.flush();
 	}
@@ -93,8 +82,7 @@ public:
         bool trunc(){
             f.close();
             f.open(fileName, ios_base::trunc |ios_base::in | ios_base::out | ios_base::binary);
-            int tot = 0;
-            f.write((char*)&tot, sizeof(int));
+            sz = 0;
             return 1;
         }
 };
