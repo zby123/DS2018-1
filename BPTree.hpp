@@ -9,7 +9,7 @@
 #define IOB std::ios_base::in | std::ios_base::out | std::ios_base::binary
 #define TIOB std::ios_base::trunc | std::ios_base::in | std::ios_base::out | std::ios_base::binary
 #define OFFSET_TYPE unsigned long
-#define MAX_BLOCK_SIZE ((((4096 - sizeof(char) - 3 * sizeof(OFFSET_TYPE) - sizeof(short)) / (sizeof(treeData))) >> 1) << 1)
+#define MAX_BLOCK_SIZE ((((2048 - sizeof(char) - 3 * sizeof(OFFSET_TYPE) - sizeof(short)) / (sizeof(treeData))) >> 1) << 1)
 //file io
 const OFFSET_TYPE MAX_FILENAME_LEN = 25;
 const OFFSET_TYPE INVALID_OFFSET = -1;
