@@ -9,7 +9,8 @@
 #define IOB std::ios_base::in | std::ios_base::out | std::ios_base::binary
 #define TIOB std::ios_base::trunc | std::ios_base::in | std::ios_base::out | std::ios_base::binary
 #define OFFSET_TYPE unsigned long
-#define MAX_BLOCK_SIZE ((((2048 - sizeof(char) - 3 * sizeof(OFFSET_TYPE) - sizeof(short)) / (sizeof(treeData))) >> 1) << 1)
+#define MAX_BUFFER_SIZE 4096
+#define MAX_BLOCK_SIZE ((((MAX_BUFFER_SIZE - sizeof(char) - 3 * sizeof(OFFSET_TYPE) - sizeof(short)) / (sizeof(treeData))) >> 1) << 1)
 //file io
 const OFFSET_TYPE MAX_FILENAME_LEN = 25;
 const OFFSET_TYPE INVALID_OFFSET = -1;
@@ -31,6 +32,7 @@ const char DB_SUFFIX[10] = ".ksxdb";
 const char IDX_SUFFIX[10] = ".ksxidx";
 const char IDX_MGR_SUFFIX[10] = ".idxmgr";
 const char DB_MGR_SUFFIX[10] = ".dbmgr";
+char rwBuffer[MAX_BUFFER_SIZE];
 
 template<typename A, typename B>
 struct mypair{
@@ -147,10 +149,15 @@ private:
     bool writeIdx(){
         if(!fidx.is_open()) fidx.open(idxFileName, IOB);
         fidx.seekp(0);
-        fidx.write(idxFileName, sizeof(char) * MAX_FILENAME_LEN);
-        fidx.write(dbFileName, sizeof(char) * MAX_FILENAME_LEN);
-        fidx.write((const char*)&dataSize, sizeof( OFFSET_TYPE ));
-        fidx.write((const char*)&rootOffset, sizeof( OFFSET_TYPE ));
+        OFFSET_TYPE pos = 0;
+        memcpy(&(rwBuffer[pos]), idxFileName, sizeof(char) * MAX_FILENAME_LEN);
+        pos += sizeof(char) * MAX_FILENAME_LEN;
+        memcpy(&(rwBuffer[pos]), dbFileName, sizeof(char) * MAX_FILENAME_LEN);
+        pos += sizeof(char) * MAX_FILENAME_LEN;
+        memcpy(&(rwBuffer[pos]), &dataSize, sizeof(OFFSET_TYPE));
+        pos += sizeof(OFFSET_TYPE);
+        memcpy(&(rwBuffer[pos]), &rootOffset, sizeof(OFFSET_TYPE));
+        fidx.write(rwBuffer, MAX_BUFFER_SIZE);
         fidx.flush();
         return 1;
     }
@@ -158,17 +165,25 @@ private:
     bool readIdx(){
         if(!fidx.is_open()) fidx.open(idxFileName, IOB);
         char tmp[MAX_FILENAME_LEN];
-        OFFSET_TYPE offset = 0;
+        OFFSET_TYPE pos = 0;
         fidx.seekg(0);
-        fidx.read(tmp, sizeof(char) * MAX_FILENAME_LEN);
+        fidx.read(rwBuffer, sizeof(char) * MAX_BUFFER_SIZE);
+        fidx.flush();
+        memcpy(tmp, &(rwBuffer[pos]), sizeof(char) * MAX_FILENAME_LEN);
         if(strcmp(idxFileName, tmp) != 0) throw fileNotMatch();
         strcpy(idxFileName, tmp);
+        pos += sizeof(char) * MAX_FILENAME_LEN;
+        memcpy(dbFileName, &(rwBuffer[pos]), sizeof(char) * MAX_FILENAME_LEN);
+        pos += sizeof(char) * MAX_FILENAME_LEN;
+        memcpy((char*)&dataSize, &(rwBuffer[pos]),sizeof(OFFSET_TYPE));
+        pos += sizeof(OFFSET_TYPE);
+        memcpy((char*)&rootOffset, &(rwBuffer[pos]),sizeof(OFFSET_TYPE));
+        /*fidx.read(tmp, sizeof(char) * MAX_FILENAME_LEN);
         fidx.read(dbFileName, sizeof(char) * MAX_FILENAME_LEN);
         fidx.read((char*)&dataSize, sizeof( OFFSET_TYPE ));
-        fidx.read((char*)&rootOffset, sizeof( OFFSET_TYPE ));
-        fidx.flush();
+        fidx.read((char*)&rootOffset, sizeof( OFFSET_TYPE ));*/
         //I will read mgr file into Q here
-        OFFSET_TYPE fsize = 0;
+       // OFFSET_TYPE fsize = 0;
        /* fmgr.open(idxFileMgr, IOB);
         fmgr.seekg(0, std::ios_base::end);
         fsize = fmgr.tellg();
@@ -200,12 +215,8 @@ private:
         if(!fidx.is_open() || fidx.fail() ) return nullptr;
         BPTNode *tmp = new BPTNode;
         fidx.seekg(offset);
-        fidx.read((char*)&(tmp->nodeType), sizeof(char));
-        fidx.read((char*)&(tmp->nextNode), sizeof( OFFSET_TYPE ));
-        fidx.read((char*)&(tmp->prevNode), sizeof( OFFSET_TYPE ));
-        fidx.read((char*)&(tmp->sz), sizeof( short ));
-        fidx.read((char*)&(tmp->nodeOffset), sizeof( OFFSET_TYPE ));
-        fidx.read((char*)(tmp->data), sizeof(treeData) * MAX_BLOCK_SIZE);
+        fidx.read(rwBuffer, sizeof(char) * MAX_BUFFER_SIZE);
+        memcpy(tmp, rwBuffer, sizeof(BPTNode));
         return tmp;
     }
     bool writeNode(BPTNode *p, OFFSET_TYPE offset = 0){
@@ -221,12 +232,8 @@ private:
             return 0;
         }
         fidx.seekp(offset);
-        fidx.write((const char*)&(p->nodeType), sizeof(char));
-        fidx.write((const char*)&(p->nextNode), sizeof( OFFSET_TYPE ));
-        fidx.write((const char*)&(p->prevNode), sizeof( OFFSET_TYPE ));
-        fidx.write((const char*)&(p->sz), sizeof(short));
-        fidx.write((const char*)&(p->nodeOffset), sizeof( OFFSET_TYPE ));
-        fidx.write((const char*)(p->data), sizeof(treeData) * MAX_BLOCK_SIZE);
+        memcpy(rwBuffer, p, sizeof(BPTNode));
+        fidx.write(rwBuffer, sizeof(char) * MAX_BUFFER_SIZE);
         fidx.flush();
         return 1;
     }
