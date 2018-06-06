@@ -7,7 +7,7 @@ public:
 	tstring<20> password, email, phone;
 	tstring<40> name;
         char privilege;
-        int id;
+        unsigned int id;
 };
 
 #endif

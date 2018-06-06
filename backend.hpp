@@ -8,6 +8,7 @@
 #include "tokenscanner.hpp"
 #include "DB.hpp"
 #include "time.hpp"
+#include "fvector.h"
 #include <cstring>
 #include <string>
 
@@ -15,7 +16,7 @@
 
 class Backend {
 private:
-	DB<int, User> userDB;
+        fvector<int, User> userDB;
 	DB<tstring<20>, Train, cmp> trainDB;
 	DB<tstring<60>, char, cmp> routeDB;
 	DB<tstring<40>, Ticket, cmp> ticketDB;
@@ -76,7 +77,7 @@ public:
 		int id = buffer.geti();
 		tstring<20> pwd;
 		pwd = buffer.gets();
-		auto ret = userDB.find(id);
+                auto ret = userDB.find(id - 2018);
 		if (!ret.second) {
 			return 0;
 		}
@@ -91,7 +92,7 @@ public:
 	}
 
 	char *query_profile(int id) {
-		auto ret = userDB.find(id);
+                auto ret = userDB.find(id - 2018);
 		if (!ret.second) {
 			char *st = new char[2];
 			st[0] = '0';
@@ -119,7 +120,7 @@ public:
 		char *tmsg = msg;
 		buffer.set(tmsg);
 		int id = buffer.geti();
-		auto res = userDB.find(id);
+                auto res = userDB.find(id - 2018);
 		if (!res.second) return 0;
 		User user;
 		user.name = buffer.gets();
@@ -128,14 +129,14 @@ public:
 		user.phone = buffer.gets();
 		user.id = id;
 		user.privilege = res.first->privilege;
-		userDB.modify(id, user);
+                userDB.modify(id - 2018, user);
 		delete res.first;
 		return 1;
 	}
 
 	int modify_privilege(int id1, int id2, int pri) {
-		auto ret1 = userDB.find(id1);
-		auto ret2 = userDB.find(id2);
+                auto ret1 = userDB.find(id1 - 2018);
+                auto ret2 = userDB.find(id2 - 2018);
 		if (!ret1.second || !ret2.second) {
 			if (ret1.second) delete ret1.first;
 			if (ret2.second) delete ret2.first;
@@ -152,7 +153,7 @@ public:
 			return 0;
 		}
 		ret2.first->privilege = pri;
-		userDB.modify(ret2.first->id, *(ret2.first));
+                userDB.modify(ret2.first->id - 2018, *(ret2.first));
 		delete ret1.first;
 		delete ret2.first;
 		return 1;

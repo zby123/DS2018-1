@@ -4,13 +4,12 @@
 #include <iostream>
 #include <cstring>
 #include "queue.h"
-#include <assert.h>
 #include "vector.hpp"
 #include "dbException.hpp"
 #define IOB std::ios_base::in | std::ios_base::out | std::ios_base::binary
 #define TIOB std::ios_base::trunc | std::ios_base::in | std::ios_base::out | std::ios_base::binary
 #define OFFSET_TYPE unsigned long
-#define MAX_BLOCK_SIZE ((((2048 - sizeof(char) - 3 * sizeof(OFFSET_TYPE) - sizeof(short)) / (sizeof(treeData))) >> 1) << 1)
+#define MAX_BLOCK_SIZE ((((4096 - sizeof(char) - 3 * sizeof(OFFSET_TYPE) - sizeof(short)) / (sizeof(treeData))) >> 1) << 1)
 //file io
 const OFFSET_TYPE MAX_FILENAME_LEN = 25;
 const OFFSET_TYPE INVALID_OFFSET = -1;
@@ -328,7 +327,6 @@ private:
     }
     //merge with right
     bool mergeNode(BPTNode *l, BPTNode *r){
-        if(l == nullptr || r == nullptr || l->sz + r->sz >= MAX_BLOCK_SIZE) assert(0);
         for(OFFSET_TYPE i = 0; i < r->sz; ++i) l->data[l->sz + i] = r->data[i];
         l->nextNode = r->nextNode;
         if(r->nextNode != (OFFSET_TYPE)(-1)){
