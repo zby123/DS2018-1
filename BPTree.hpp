@@ -258,6 +258,7 @@ private:
    }
 
    OFFSET_TYPE writeData(const T *dataPtr){
+       if(sizeof(T) <= sizeof(char)) return -1;
        if(fdb.fail()) fdb.close();
        if(!fdb.is_open()) fdb.open(dbFileName, IOB);
        OFFSET_TYPE offset = 0;
