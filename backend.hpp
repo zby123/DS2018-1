@@ -245,13 +245,6 @@ public:
 			res[2] = '\0'; res[1] = '\n';
 			return res;
 		}
-		if (!ret.first->sale) {
-			delete ret.first;
-			char *res = new char[3];
-			res[0] = '0';
-			res[2] = '\0'; res[1] = '\n';
-			return res;
-		}
 		string str;
 		str += (string)ret.first->id; str += ' ';
 		str += (string)ret.first->name; str += ' ';
